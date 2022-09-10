@@ -1,6 +1,7 @@
 use std::io::Error;
 use std::io::ErrorKind;
 use std::str::FromStr;
+use warp::Filter;
 
 #[derive(Debug)]
 struct Question {
@@ -35,12 +36,9 @@ impl Question {
     }
 }
 
-fn main() {
-    let question = Question::new(
-        QuestionId::from_str("1").unwrap(),
-        "Hello world".to_string(),
-        "Some content".to_string(),
-        None,
-    );
-    println!("{:?}", question);
+#[tokio::main]
+async fn main() {
+    let hello = warp::get().map(|| format!("Hello, world!"));
+
+    warp::serve(hello).run(([127, 0, 0, 1], 3030)).await;
 }
