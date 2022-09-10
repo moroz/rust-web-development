@@ -2,7 +2,11 @@ use serde::Serialize;
 use std::io::Error;
 use std::io::ErrorKind;
 use std::str::FromStr;
-use warp::Filter;
+use warp::{reject::Reject, Filter};
+
+#[derive(Debug)]
+struct InvalidId;
+impl Reject for InvalidId {}
 
 #[derive(Debug, Serialize)]
 struct Question {
@@ -45,7 +49,10 @@ async fn get_questions() -> Result<impl warp::Reply, warp::Rejection> {
         Some(vec!["faq".to_string()]),
     );
 
-    Ok(warp::reply::json(&question))
+    match question.id.0.parse::<i32>() {
+        Err(_) => Err(warp::reject::custom(InvalidId)),
+        Ok(_) => Ok(warp::reply::json(&question)),
+    }
 }
 
 #[tokio::main]
